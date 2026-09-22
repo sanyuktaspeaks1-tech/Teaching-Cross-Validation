@@ -108,3 +108,29 @@ print(f"SVC mean accuracy: {svc_scores.mean():.2f} +/- {svc_scores.std():.2f}")
 rf_scores = cross_val_score(clf_rf, X_train, y_train, cv=cv)
 print(f"RF mean accuracy: {rf_scores.mean():.2f} +/- {rf_scores.std():.2f}")
 ```
+
+### RF should come out clearly ahead of SVC here. But remember SVC was given gamma=0.1 arbitrarily back in Step 3 -- maybe that's just a bad setting, not proof SVC is a worse model. Step 7 checks that.
+ 
+ 
+### STEP 7: Use CV to tune a hyperparameter (gamma for SVC)
+### "gamma" controls how far the influence of a single training point reaches in SVC's decision boundary. We don't know the best value in  advance, so we just TRY a few and let cross-validation tell us which one generalizes best. This is called a "grid search".
+### Go back and change different gamma values and check again if there is any change in accuracy
+
+### 🐛 Some folds might contain many photos of person 5 and very few of person 12. That imbalance alone can shift accuracy, independent of how good the model is.
+### 🐛 StratifiedKFold fixes this: every fold gets (roughly) the same proportion of each person's photos, matching the class balance of the full dataset.
+```python
+print("RF plain KFold accuracies:", np.round(rf_scores, 2))
+ 
+### --- Now with StratifiedKFold ---
+strat_cv = StratifiedKFold(n_splits=8)
+rf_strat_scores = cross_val_score(clf_rf, X_train, y_train, cv=strat_cv)
+print("RF StratifiedKFold accuracies:", np.round(rf_strat_scores, 2))
+print("mean accuracy:", round(rf_strat_scores.mean(), 2), "+/-", round(rf_strat_scores.std(), 2))
+```
+📌RF plain KFold accuracies: [0.88 0.8  0.7  0.78 0.68 0.78 0.78 0.7 ]
+📌RF StratifiedKFold accuracies: [0.82 0.85 0.88 0.82 0.92 0.85 0.82 0.8 ]
+📌mean accuracy: 0.85 +/- 0.04
+
+💡**Swinging (plain KFold):** the 8 accuracies vary a lot from fold to fold, because unstratified splits can accidentally put an uneven mix of classes in each fold, making some folds easier and some harder to score well on.
+
+💡**Tight (StratifiedKFold):** the 8 accuracies stay close together, because each fold gets a proportional mix of every class, so no fold is unfairly easy or hard, and the resulting scores reflect the model's real performance more consistently.

@@ -94,6 +94,14 @@ cv = KFold(n_splits=8)  # 8 folds
  
 ### --- SVC with 8-fold CV ---
 svc_scores = cross_val_score(clf_svc, X_train, y_train, cv=cv)
+
+
+### RF should come out clearly ahead of SVC here. But remember SVC was given gamma=0.1 arbitrarily back in Step 3 -- maybe that's just a bad setting, not proof SVC is a worse model. Step 7 checks that.
+ 
+ 
+### STEP 7: Use CV to tune a hyperparameter (gamma for SVC)
+### "gamma" controls how far the influence of a single training point reaches in SVC's decision boundary. We don't know the best value in  advance, so we just TRY a few and let cross-validation tell us which one generalizes best. This is called a "grid search".
+
 print(f"SVC mean accuracy: {svc_scores.mean():.2f} +/- {svc_scores.std():.2f}")
  
 ### --- RF with 8-fold CV ---

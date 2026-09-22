@@ -52,4 +52,39 @@ print(f"SVC TRAIN accuracy: {accuracy_score(y_train, y_pred_svc):.2f}")
 y_pred_rf = clf_rf.predict(X_train)
 print(f"RF TRAIN accuracy: {accuracy_score(y_train, y_pred_rf):.2f}")
 ```
+A model scoring ~1.00 on the data it was trained on isn't proof it learned — it may have just memorized those exact examples. That's why training accuracy is never trusted for model selection; only accuracy on unseen data (validation/test/CV) tells you if the model actually generalizes.
 
+### Instead of testing on training data (Step 4), we carve out a chunk of the TRAINING set that the model will never train on. This chunk
+### is called the "validation set". We take the last 20% of X_train, y_train and set it aside purely for evaluation.
+### We are NOT touching X_test/y_test here -- that stays locked away until Step 10, once model selection is completely finished.
+
+```python
+n_val = int(0.2 * len(X_train))           # how many samples = 20%?
+n_train_only = len(X_train) - n_val       # the rest stay for training
+ 
+X_tr = X_train[:n_train_only]   # first 80% -> train on this
+X_val = X_train[n_train_only:]  # last 20%  -> only used to evaluate
+ 
+y_tr = y_train[:n_train_only]
+y_val = y_train[n_train_only:]
+ 
+print("X_tr (train):", X_tr.shape, " X_val (validation):", X_val.shape)
+ 
+# Retrain each model, but now ONLY on X_tr (not the full X_train)
+clf_svc.fit(X_tr, y_tr)
+clf_rf.fit(X_tr, y_tr)
+ 
+# Predict on X_val, which the models have never seen
+y_pred_svc = clf_svc.predict(X_val)
+y_pred_rf = clf_rf.predict(X_val)
+ 
+print(f"SVC VAL accuracy: {accuracy_score(y_val, y_pred_svc):.2f}")
+print(f"RF  VAL accuracy: {accuracy_score(y_val, y_pred_rf):.2f}")
+```
+### Compare this to Step 4's ~1.00 scores. This is much more honest, because X_val was never used for training.
+
+### CAVEAT: we only tried ONE particular 80/20 slice. If we'd sliced the data differently, we might get different numbers. That instability is exactly what Step 6 fixes.
+ 
+ 
+### STEP 6: K-fold cross-validation
+### Idea: instead of one validation slice, make several. Split the data into K folds. Repeat K times: train on K-1 folds, test on the fold left out. Every sample gets tested exactly once, and weaverage the K scores into one overall estimate.

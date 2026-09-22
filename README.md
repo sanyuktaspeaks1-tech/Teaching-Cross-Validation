@@ -9,7 +9,7 @@ from sklearn.metrics import accuracy_score, f1_score
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import (
-    train_test_split, KFold, StratifiedKFold, LeaveOneOut
+    train_test_split, KFold, StratifiedKFold, LeaveOneOut,cross_val_score
 )
 ```
 Let's Load an inbuilt dataset
@@ -83,8 +83,8 @@ print(f"RF  VAL accuracy: {accuracy_score(y_val, y_pred_rf):.2f}")
 ```
 ### Compare this to Step 4's ~1.00 scores. This is much more honest, because X_val was never used for training.
 
+
 ### CAVEAT: we only tried ONE particular 80/20 slice. If we'd sliced the data differently, we might get different numbers. That instability is exactly what Step 6 fixes.
- 
- 
+
 ### STEP 6: K-fold cross-validation
 ### Idea: instead of one validation slice, make several. Split the data into K folds. Repeat K times: train on K-1 folds, test on the fold left out. Every sample gets tested exactly once, and weaverage the K scores into one overall estimate.

@@ -88,3 +88,15 @@ print(f"RF  VAL accuracy: {accuracy_score(y_val, y_pred_rf):.2f}")
 
 ### STEP 6: K-fold cross-validation
 ### Idea: instead of one validation slice, make several. Split the data into K folds. Repeat K times: train on K-1 folds, test on the fold left out. Every sample gets tested exactly once, and weaverage the K scores into one overall estimate.
+
+```python
+cv = KFold(n_splits=8)  # 8 folds
+ 
+### --- SVC with 8-fold CV ---
+svc_scores = cross_val_score(clf_svc, X_train, y_train, cv=cv)
+print(f"SVC mean accuracy: {svc_scores.mean():.2f} +/- {svc_scores.std():.2f}")
+ 
+### --- RF with 8-fold CV ---
+rf_scores = cross_val_score(clf_rf, X_train, y_train, cv=cv)
+print(f"RF mean accuracy: {rf_scores.mean():.2f} +/- {rf_scores.std():.2f}")
+```
